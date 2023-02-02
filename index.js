@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 
 //middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.lvjwpo8.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -19,7 +19,11 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    await client.connect((err)=>{
+      app.listen(port, () => {
+        console.log("Listening at port", port);
+      });
+    });
     const productCollection = client.db("Fruitify").collection("Inventory");
 
     //get products
@@ -73,8 +77,4 @@ run().catch(console.dir);
 
 app.get("/", (req, res) => {
   res.send("Fruitify server running");
-});
-
-app.listen(port, () => {
-  console.log("Listening at port", port);
 });
